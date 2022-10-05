@@ -1,0 +1,35 @@
+@charset "UTF-8";
+/* 여백 초기화 */
+body,
+div,
+dl,
+dd,
+dt,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+fieldset,
+form,
+legend,
+p,
+blockquote,
+th,
+td,
+input,
+figure,
+figcaption {
+  margin: 0;
+  padding: 0;
+}
+
+div div {
+  color: #000;
+}
