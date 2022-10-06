@@ -45,14 +45,12 @@
 
     // echo $myBoardID;
 
-    $sql = "SELECT b.boardTitle, m.youName, b.regTime, b.boardView, b.boardContents FROM myBoard b JOIN myMember m ON(m.myMemberID = b.myMemberID) WHERE b.myBoardID = {$myBoardID}";
-    $result = $connect -> query($sql);
-
-
-    // 보드 뷰 + 1 (UPDATE 활용)
-    $sql = “UPDATE myBoard SET boardView = boardView + 1 WHERE myBoardID = {$myBoardID}“;
+    // 보드 뷰 + 1 (순서 중요 -> 이 아래에 있으면 들어갔다가 나올 때 조회수가 올라감)
+    $sql = "UPDATE myBoard SET boardView = boardView + 1 WHERE myBoardID = {$myBoardID}";
     $connect -> query($sql);
 
+    $sql = "SELECT b.boardTitle, m.youName, b.regTime, b.boardView, b.boardContents FROM myBoard b JOIN myMember m ON(m.myMemberID = b.myMemberID) WHERE b.myBoardID = {$myBoardID}";
+    $result = $connect -> query($sql);
 
     if($result){
         $info = $result -> fetch_array(MYSQLI_ASSOC);
@@ -68,6 +66,8 @@
         echo "<tr><th>조회수</th><td>".$info['boardView']."</td></tr>";
         echo "<tr><th>내용</th><td class='height'>".$info['boardContents']."</td></tr>";
     }
+
+    
 ?>
                             <!-- <tr>
                                 <th>등록자</th>

@@ -40,7 +40,16 @@
                 </div>
                 <div class="board__search">
                     <div class="left">
-                        * 총 <em>9999</em>건의 게시물이 등록되어 있습니다.
+                        <!-- * 총 <em>9999</em>건의 게시물이 등록되어 있습니다. -->
+<?php
+    $sql = "SELECT boardContents FROM myBoard";
+    $result = $connect -> query($sql);
+    
+    if($result){
+        $count = $result -> num_rows;
+        echo "총 <em>".$count."</em>건의 게시물이 등록되어 있습니다.";
+    }
+?>
                     </div>
                     <div class="right">
                         <form action="boardSearch.php" name="boardSearch" method="get">
@@ -119,6 +128,8 @@
                 echo "<td>".$info['boardView']."</td>";
                 echo "</tr>";
             }
+        } else {
+            echo "<tr><td colspan='5'>게시글이 없습니다.</td></tr>";
         }
     }
 ?>

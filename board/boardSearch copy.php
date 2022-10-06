@@ -34,13 +34,6 @@
                     <h3>게시판 검색 결과</h3>
 <?php
 
-    if(isset($_GET['page'])){
-        $page = (int)$_GET['page'];
-    } else {
-        $page = 1;
-    }
-
-
     function msg($alert){
         echo "<p>총 ".$alert."건이 검색되었습니다.</p>";
     }
@@ -48,30 +41,40 @@
     $searchKeyword = $_GET['searchKeyword'];
     $searchOption = $_GET['searchOption'];
 
+    // echo $searchKeyword, $searchOption;
+
     $searchKeyword = $connect -> real_escape_string(trim($searchKeyword));
     $searchOption = $connect -> real_escape_string(trim($searchOption));
+
+    // 쿼리문(JOIN)
+    // b.myBoardID, b.boardTitle, b.boardContents, m.youName, b.regTime, b.boardView
+
+    // $sql = "SELECT b.myBoardID, b.boardTitle, b.boardContents, m.youName, b.regTime, b.boardView FROM myBoard b JOIN myMember m ON(b.myMemberID = m.myMemberID) WHERE b.boardTitle LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC LIMIT 10";
+    // $sql = "SELECT b.myBoardID, b.boardTitle, b.boardContents, m.youName, b.regTime, b.boardView FROM myBoard b JOIN myMember m ON(b.myMemberID = m.myMemberID) WHERE b.boardContents LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC LIMIT 10";
+    // $sql = "SELECT b.myBoardID, b.boardTitle, b.boardContents, m.youName, b.regTime, b.boardView FROM myBoard b JOIN myMember m ON(b.myMemberID = m.myMemberID) WHERE m.youName LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC LIMIT 10";
 
     $sql = "SELECT b.myBoardID, b.boardTitle, b.boardContents, m.youName, b.regTime, b.boardView FROM myBoard b JOIN myMember m ON(b.myMemberID = m.myMemberID) ";
 
     switch($searchOption){
         case 'title':
-            $sql.= "WHERE b.boardTitle LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC ";
+            $sql.= "WHERE b.boardTitle LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC LIMIT 10";
             break;
         
         case 'content':
-            $sql.= "WHERE b.boardContents LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC ";
+            $sql.= "WHERE b.boardContents LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC LIMIT 10";
             break;
         
         case 'name' :
-            $sql.= "WHERE m.youName LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC ";
+            $sql.= "WHERE m.youName LIKE '%{$searchKeyword}%' ORDER BY myBoardID DESC LIMIT 10";
             break;
     }
 
     $result = $connect -> query($sql);
-
-    // 전체 게시글 갯수
-    $totalCount = $result -> num_rows;
-    msg($totalCount);
+    if($result){
+        $count = $result -> num_rows;
+        // echo $count;
+        msg($count);
+    }
 
 ?>
                 </div>
@@ -98,22 +101,9 @@
                         <tbody>
 <?php
 
-    $viewNum = 10;
-    $viewLimit = ($viewNum * $page) - $viewNum;
-
-    // echo $sql;
-
-    $sql = $sql."LIMIT {$viewLimit}, {$viewNum}";
-    $result = $connect -> query($sql);
-
-    // if($result){
-    //     // echo $count;  나오는지 안 나오는지 확인
-    // }
-
     if($result){
-
         $count = $result -> num_rows;
-
+        var_dump($count);
         if($count > 0){
             for($i=1; $i <= $count; $i++){
                 $info = $result -> fetch_array(MYSQLI_ASSOC);
@@ -136,11 +126,16 @@
                 </div>
                 <div class="board__pages">
                     <ul>
-<?php
-    // echo $totalCount;
+                    <?php
+    $sql = "SELECT count(myBoardID) FROM myBoard";
+    $result = $connect -> query($sql);
+
+    $boardCount = $result -> fetch_array(MYSQLI_ASSOC);
+    $boardCount = $boardCount['count(myBoardID)'];
+
 
     // 총 페이지 갯수
-    $boardCount = ceil($totalCount / $viewNum);
+    $boardCount = ceil($boardCount / $viewNum);
 
     // echo $boardCount;
 
@@ -158,8 +153,8 @@
     // 이전 페이지, 처음 페이지로 이동
     if($page != 1){
         $prevPage = $page - 1;
-        echo "<li><a href='boardSearch.php?page=1&searchKeyword={$searchKeyword}&searchOption={$searchOption}'>처음으로</a></li>";
-        echo "<li><a href='boardSearch.php?page={$prevPage}&searchKeyword={$searchKeyword}&searchOption={$searchOption}'>이전</a></li>";
+        echo "<li><a href='board.php?page=1'>처음으로</a></li>";
+        echo "<li><a href='board.php?page={$prevPage}'>이전</a></li>";
     }
 
 
@@ -167,14 +162,14 @@
     for($i= $startPage; $i<=$endPage; $i++){
         $active = "";
         if($i == $page) $active = "active";
-        echo "<li class='{$active}'><a href='boardSearch.php?page={$i}&searchKeyword={$searchKeyword}&searchOption={$searchOption}'>{$i}</a></li>";
+        echo "<li class='{$active}'><a href='board.php?page={$i}'>{$i}</a></li>";
     }
 
     // 다음 페이지, 마지막 페이지로 이동
     if($page != $endPage){
         $nextPage = $page + 1;
-        echo "<li><a href='boardSearch.php?page={$nextPage}&searchKeyword={$searchKeyword}&searchOption={$searchOption}'>다음</a></li>";
-        echo "<li><a href='boardSearch.php?page={$boardCount}&searchKeyword={$searchKeyword}&searchOption={$searchOption}'>마지막으로</a></li>";
+        echo "<li><a href='board.php?page={$nextPage}'>다음</a></li>";
+        echo "<li><a href='board.php?page={$boardCount}'>마지막으로</a></li>";
     }
 ?>
                     </ul>
